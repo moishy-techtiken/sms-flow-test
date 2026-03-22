@@ -90,7 +90,8 @@ exports.TransactionIsolationLevel = runtime.makeStrictEnum({
 });
 exports.ConversationScalarFieldEnum = {
     id: 'id',
-    phoneNumber: 'phoneNumber',
+    userPhoneNumber: 'userPhoneNumber',
+    servicePhoneNumber: 'servicePhoneNumber',
     flowId: 'flowId',
     flowVersion: 'flowVersion',
     status: 'status',
@@ -117,7 +118,8 @@ exports.MessageScalarFieldEnum = {
 };
 exports.OptOutScalarFieldEnum = {
     id: 'id',
-    phoneNumber: 'phoneNumber',
+    userPhoneNumber: 'userPhoneNumber',
+    servicePhoneNumber: 'servicePhoneNumber',
     reason: 'reason',
     createdAt: 'createdAt'
 };

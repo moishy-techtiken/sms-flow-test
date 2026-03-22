@@ -1,29 +1,38 @@
 import { OptOut } from "../../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 
-export async function findOptOutByPhoneNumber(
-  phoneNumber: string
+export async function findOptOut(
+  userPhoneNumber: string,
+  servicePhoneNumber: string
 ): Promise<OptOut | null> {
   return prisma.optOut.findUnique({
     where: {
-      phoneNumber
+      userPhoneNumber_servicePhoneNumber: {
+        userPhoneNumber,
+        servicePhoneNumber
+      }
     }
   });
 }
 
 export async function createOrUpdateOptOut(
-  phoneNumber: string,
+  userPhoneNumber: string,
+  servicePhoneNumber: string,
   reason: string
 ): Promise<OptOut> {
   return prisma.optOut.upsert({
     where: {
-      phoneNumber
+      userPhoneNumber_servicePhoneNumber: {
+        userPhoneNumber,
+        servicePhoneNumber
+      }
     },
     update: {
       reason
     },
     create: {
-      phoneNumber,
+      userPhoneNumber,
+      servicePhoneNumber,
       reason
     }
   });

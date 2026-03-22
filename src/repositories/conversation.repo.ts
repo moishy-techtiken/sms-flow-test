@@ -6,7 +6,8 @@ import {
 import { prisma } from "../lib/prisma";
 
 type CreateConversationInput = {
-  phoneNumber: string;
+  userPhoneNumber: string;
+  servicePhoneNumber: string;
   flowId: string;
   flowVersion: number;
   currentStep: string;
@@ -16,12 +17,14 @@ type CreateConversationInput = {
   expiresAt: Date | null;
 };
 
-export async function findActiveConversationByPhoneNumber(
-  phoneNumber: string
+export async function findActiveConversation(
+  userPhoneNumber: string,
+  servicePhoneNumber: string
 ): Promise<Conversation | null> {
   const conversation = await prisma.conversation.findFirst({
     where: {
-      phoneNumber,
+      userPhoneNumber,
+      servicePhoneNumber,
       status: ConversationStatus.active
     },
     orderBy: {
@@ -54,7 +57,8 @@ export async function createConversation(
 ): Promise<Conversation> {
   return prisma.conversation.create({
     data: {
-      phoneNumber: input.phoneNumber,
+      userPhoneNumber: input.userPhoneNumber,
+      servicePhoneNumber: input.servicePhoneNumber,
       flowId: input.flowId,
       flowVersion: input.flowVersion,
       currentStep: input.currentStep,

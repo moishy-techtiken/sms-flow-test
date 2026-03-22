@@ -1,7 +1,7 @@
 import { ActionHandlerMap } from "../../engine/types";
 
 export const exampleActions: ActionHandlerMap = {
-  async notifyExampleAdmin({ context, services }) {
+  async notifyExampleAdmin({ context, conversation, services }) {
     const adminPhone = process.env.EXAMPLE_ADMIN_PHONE;
     const name = typeof context.name === "string" ? context.name : "Unknown";
 
@@ -15,6 +15,7 @@ export const exampleActions: ActionHandlerMap = {
     }
 
     await services.sendSms({
+      from: conversation.servicePhoneNumber,
       to: adminPhone,
       body: `Example flow signup: ${name}`
     });

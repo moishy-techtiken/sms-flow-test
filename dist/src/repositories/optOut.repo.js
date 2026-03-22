@@ -1,28 +1,32 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findOptOutByPhoneNumber = findOptOutByPhoneNumber;
+exports.findOptOut = findOptOut;
 exports.createOrUpdateOptOut = createOrUpdateOptOut;
-const prisma_1 = __importDefault(require("../prisma/prisma"));
-async function findOptOutByPhoneNumber(phoneNumber) {
-    return prisma_1.default.optOut.findUnique({
+const prisma_1 = require("../lib/prisma");
+async function findOptOut(userPhoneNumber, servicePhoneNumber) {
+    return prisma_1.prisma.optOut.findUnique({
         where: {
-            phoneNumber
+            userPhoneNumber_servicePhoneNumber: {
+                userPhoneNumber,
+                servicePhoneNumber
+            }
         }
     });
 }
-async function createOrUpdateOptOut(phoneNumber, reason) {
-    return prisma_1.default.optOut.upsert({
+async function createOrUpdateOptOut(userPhoneNumber, servicePhoneNumber, reason) {
+    return prisma_1.prisma.optOut.upsert({
         where: {
-            phoneNumber
+            userPhoneNumber_servicePhoneNumber: {
+                userPhoneNumber,
+                servicePhoneNumber
+            }
         },
         update: {
             reason
         },
         create: {
-            phoneNumber,
+            userPhoneNumber,
+            servicePhoneNumber,
             reason
         }
     });

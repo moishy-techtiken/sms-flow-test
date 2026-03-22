@@ -7,7 +7,8 @@ const types_1 = require("./types");
 async function startFlow(input) {
     const now = new Date();
     const conversation = await (0, conversation_repo_1.createConversation)({
-        phoneNumber: input.phoneNumber,
+        userPhoneNumber: input.userPhoneNumber,
+        servicePhoneNumber: input.servicePhoneNumber,
         flowId: input.flow.id,
         flowVersion: input.flow.version,
         currentStep: input.flow.startStep,

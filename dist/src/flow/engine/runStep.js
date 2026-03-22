@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runStep = runStep;
 const conversation_repo_1 = require("../../repositories/conversation.repo");
+const onlineBooking_service_1 = require("../../services/onlineBooking.service");
 const sms_service_1 = require("../../services/sms.service");
 const actionRegistry_1 = require("./actionRegistry");
 const globals_1 = require("./globals");
@@ -158,7 +159,8 @@ async function runStep(input) {
                     context,
                     inboundBody,
                     services: {
-                        sendSms: sms_service_1.sendSms
+                        sendSms: sms_service_1.sendSms,
+                        onlineBooking: onlineBooking_service_1.onlineBookingService
                     }
                 });
                 context = {

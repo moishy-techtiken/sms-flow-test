@@ -1,7 +1,9 @@
+import { flow as appointmentBookingFlow } from "../flows/appointmentBooking/flow";
 import { flow as exampleFlow } from "../flows/example/flow";
+import { flow as rebMeirFlow } from "../flows/rebMeir/flow";
 import { SmsFlow } from "./types";
 
-const flows: SmsFlow[] = [exampleFlow];
+const flows: SmsFlow[] = [appointmentBookingFlow, exampleFlow, rebMeirFlow];
 
 export const flowRegistry: Record<string, SmsFlow> = Object.fromEntries(
   flows.map((flow) => [flow.id, flow])

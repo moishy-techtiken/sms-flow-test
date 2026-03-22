@@ -3,6 +3,7 @@ import {
   completeConversation,
   updateConversation
 } from "../../repositories/conversation.repo";
+import { onlineBookingService } from "../../services/onlineBooking.service";
 import { sendSms } from "../../services/sms.service";
 import { actionRegistry } from "./actionRegistry";
 import { conditionRegistry } from "./globals";
@@ -221,7 +222,8 @@ export async function runStep(input: RunStepInput): Promise<RunStepResult> {
           context,
           inboundBody,
           services: {
-            sendSms
+            sendSms,
+            onlineBooking: onlineBookingService
           }
         });
 

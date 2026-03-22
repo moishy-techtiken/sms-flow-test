@@ -25,22 +25,23 @@ enum MessageDirection {
 }
 
 model Conversation {
-  id            String             @id @default(cuid())
-  phoneNumber   String
-  flowId        String
-  flowVersion   Int
-  status        ConversationStatus @default(active)
-  currentStep   String
-  contextJson   Json
-  startedAt     DateTime
-  lastMessageAt DateTime
-  expiresAt     DateTime?
-  completedAt   DateTime?
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  messages      Message[]
+  id                 String             @id @default(cuid())
+  userPhoneNumber    String
+  servicePhoneNumber String
+  flowId             String
+  flowVersion        Int
+  status             ConversationStatus @default(active)
+  currentStep        String
+  contextJson        Json
+  startedAt          DateTime
+  lastMessageAt      DateTime
+  expiresAt          DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  messages           Message[]
 
-  @@index([phoneNumber, status])
+  @@index([userPhoneNumber, servicePhoneNumber, status])
 }
 
 model Message {
@@ -60,8 +61,11 @@ model Message {
 }
 
 model OptOut {
-  id          String   @id @default(cuid())
-  phoneNumber String   @unique
-  reason      String
-  createdAt   DateTime @default(now())
+  id                 String   @id @default(cuid())
+  userPhoneNumber    String
+  servicePhoneNumber String
+  reason             String
+  createdAt          DateTime @default(now())
+
+  @@unique([userPhoneNumber, servicePhoneNumber])
 }

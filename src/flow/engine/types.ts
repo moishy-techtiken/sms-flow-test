@@ -1,4 +1,5 @@
 import { Conversation, Prisma } from "../../../generated/prisma/client";
+import { OnlineBookingService } from "../../services/onlineBooking.service";
 import { SendSmsResult } from "../../services/sms.service";
 
 export type ValidatorName =
@@ -103,6 +104,7 @@ export type ValidatorResult =
 export type ValidatorFn = (input: string) => ValidatorResult;
 
 export type SendSmsFn = (input: {
+  from: string;
   to: string;
   body: string;
 }) => Promise<SendSmsResult>;
@@ -120,6 +122,7 @@ export type ActionHandler = (input: {
   inboundBody: string | null;
   services: {
     sendSms: SendSmsFn;
+    onlineBooking: OnlineBookingService;
   };
 }) => Promise<ActionHandlerResult>;
 

@@ -17,6 +17,9 @@ exports.RESTARTED_MESSAGE = "Your conversation was restarted. Send a trigger key
 exports.conditionRegistry = {
     isNameConfirmed({ context }) {
         return context.nameConfirmed === true;
+    },
+    appointmentCountIsPositive({ context }) {
+        return (typeof context.appointmentCount === "number" && context.appointmentCount > 0);
     }
 };
 function getGlobalCommand(body) {

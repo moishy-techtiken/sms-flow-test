@@ -5,14 +5,16 @@ import { RunStepResult, SmsFlow, getFlowExpiresAt } from "./types";
 
 type StartFlowInput = {
   flow: SmsFlow;
-  phoneNumber: string;
+  userPhoneNumber: string;
+  servicePhoneNumber: string;
 };
 
 export async function startFlow(input: StartFlowInput): Promise<RunStepResult> {
   const now = new Date();
 
   const conversation = await createConversation({
-    phoneNumber: input.phoneNumber,
+    userPhoneNumber: input.userPhoneNumber,
+    servicePhoneNumber: input.servicePhoneNumber,
     flowId: input.flow.id,
     flowVersion: input.flow.version,
     currentStep: input.flow.startStep,

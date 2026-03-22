@@ -15,6 +15,7 @@ async function sendOutboundReply(input) {
         return null;
     }
     const result = await (0, sms_service_1.sendSms)({
+        from: input.fromNumber,
         to: input.toNumber,
         body: input.body
     });
@@ -30,7 +31,17 @@ async function sendOutboundReply(input) {
     });
     return input.body;
 }
+function isDuplicateMessageError(error) {
+    return (error instanceof client_1.Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002");
+}
 async function processIncomingMessage(input) {
+    console.info("process_incoming_message", {
+        provider: input.provider,
+        providerMessageId: input.providerMessageId,
+        userPhoneNumber: input.fromNumber,
+        servicePhoneNumber: input.toNumber
+    });
     if (input.providerMessageId) {
         const existingMessage = await (0, message_repo_1.findMessageByProviderAndMessageId)(input.provider, input.providerMessageId);
         if (existingMessage) {
@@ -41,15 +52,37 @@ async function processIncomingMessage(input) {
             };
         }
     }
-    const inboundMessage = await (0, message_repo_1.createMessage)({
-        direction: client_1.MessageDirection.inbound,
-        provider: input.provider,
-        providerMessageId: input.providerMessageId,
-        fromNumber: input.fromNumber,
-        toNumber: input.toNumber,
-        body: input.body,
-        rawPayload: input.rawPayload
-    });
+    let inboundMessage;
+    try {
+        inboundMessage = await (0, message_repo_1.createMessage)({
+            direction: client_1.MessageDirection.inbound,
+            provider: input.provider,
+            providerMessageId: input.providerMessageId,
+            fromNumber: input.fromNumber,
+            toNumber: input.toNumber,
+            body: input.body,
+            rawPayload: input.rawPayload
+        });
+    }
+    catch (error) {
+        if (!input.providerMessageId || !isDuplicateMessageError(error)) {
+            throw error;
+        }
+        const existingMessage = await (0, message_repo_1.findMessageByProviderAndMessageId)(input.provider, input.providerMessageId);
+        if (!existingMessage) {
+            throw error;
+        }
+        console.info("duplicate_inbound_message", {
+            provider: input.provider,
+            providerMessageId: input.providerMessageId,
+            conversationId: existingMessage.conversationId
+        });
+        return {
+            status: "duplicate",
+            conversationId: existingMessage.conversationId,
+            outboundBody: null
+        };
+    }
     const command = (0, globals_1.getGlobalCommand)(input.body);
     if (command === "HELP") {
         const outboundBody = await sendOutboundReply({
@@ -64,12 +97,12 @@ async function processIncomingMessage(input) {
         };
     }
     if (command === "STOP") {
-        const activeConversation = await (0, conversation_repo_1.findActiveConversationByPhoneNumber)(input.fromNumber);
+        const activeConversation = await (0, conversation_repo_1.findActiveConversation)(input.fromNumber, input.toNumber);
         if (activeConversation) {
             await (0, conversation_repo_1.cancelConversation)(activeConversation.id);
             await (0, message_repo_1.attachConversationToMessage)(inboundMessage.id, activeConversation.id);
         }
-        await (0, optOut_repo_1.createOrUpdateOptOut)(input.fromNumber, "STOP");
+        await (0, optOut_repo_1.createOrUpdateOptOut)(input.fromNumber, input.toNumber, "STOP");
         const outboundBody = await sendOutboundReply({
             conversationId: activeConversation?.id ?? null,
             fromNumber: input.toNumber,
@@ -84,7 +117,7 @@ async function processIncomingMessage(input) {
         };
     }
     if (command === "CANCEL") {
-        const activeConversation = await (0, conversation_repo_1.findActiveConversationByPhoneNumber)(input.fromNumber);
+        const activeConversation = await (0, conversation_repo_1.findActiveConversation)(input.fromNumber, input.toNumber);
         if (!activeConversation) {
             const outboundBody = await sendOutboundReply({
                 fromNumber: input.toNumber,
@@ -112,13 +145,13 @@ async function processIncomingMessage(input) {
             outboundBody
         };
     }
-    let activeConversation = await (0, conversation_repo_1.findActiveConversationByPhoneNumber)(input.fromNumber);
+    let activeConversation = await (0, conversation_repo_1.findActiveConversation)(input.fromNumber, input.toNumber);
     if (command === "RESTART" && activeConversation) {
         await (0, conversation_repo_1.cancelConversation)(activeConversation.id);
         await (0, message_repo_1.attachConversationToMessage)(inboundMessage.id, activeConversation.id);
         activeConversation = null;
     }
-    const optedOut = await (0, optOut_repo_1.findOptOutByPhoneNumber)(input.fromNumber);
+    const optedOut = await (0, optOut_repo_1.findOptOut)(input.fromNumber, input.toNumber);
     if (optedOut) {
         const outboundBody = await sendOutboundReply({
             fromNumber: input.toNumber,
@@ -170,7 +203,8 @@ async function processIncomingMessage(input) {
     }
     const result = await (0, startFlow_1.startFlow)({
         flow,
-        phoneNumber: input.fromNumber
+        userPhoneNumber: input.fromNumber,
+        servicePhoneNumber: input.toNumber
     });
     await (0, message_repo_1.attachConversationToMessage)(inboundMessage.id, result.conversation.id);
     const outboundBody = await sendOutboundReply({

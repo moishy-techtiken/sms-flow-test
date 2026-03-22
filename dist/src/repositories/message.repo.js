@@ -1,15 +1,12 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findMessageByProviderAndMessageId = findMessageByProviderAndMessageId;
 exports.createMessage = createMessage;
 exports.attachConversationToMessage = attachConversationToMessage;
 const client_1 = require("../../generated/prisma/client");
-const prisma_1 = __importDefault(require("../lib/prisma"));
+const prisma_1 = require("../lib/prisma");
 async function findMessageByProviderAndMessageId(provider, providerMessageId) {
-    return prisma_1.default.message.findUnique({
+    return prisma_1.prisma.message.findUnique({
         where: {
             provider_providerMessageId: {
                 provider,
@@ -19,7 +16,7 @@ async function findMessageByProviderAndMessageId(provider, providerMessageId) {
     });
 }
 async function createMessage(input) {
-    return prisma_1.default.message.create({
+    return prisma_1.prisma.message.create({
         data: {
             conversationId: input.conversationId ?? null,
             direction: input.direction,
@@ -35,7 +32,7 @@ async function createMessage(input) {
     });
 }
 async function attachConversationToMessage(messageId, conversationId) {
-    return prisma_1.default.message.update({
+    return prisma_1.prisma.message.update({
         where: {
             id: messageId
         },

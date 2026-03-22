@@ -21,6 +21,11 @@ export const RESTARTED_MESSAGE =
 export const conditionRegistry: Record<string, ConditionHandler> = {
   isNameConfirmed({ context }) {
     return context.nameConfirmed === true;
+  },
+  appointmentCountIsPositive({ context }) {
+    return (
+      typeof context.appointmentCount === "number" && context.appointmentCount > 0
+    );
   }
 };
 

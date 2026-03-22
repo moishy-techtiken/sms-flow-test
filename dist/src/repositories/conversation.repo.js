@@ -1,19 +1,17 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findActiveConversationByPhoneNumber = findActiveConversationByPhoneNumber;
+exports.findActiveConversation = findActiveConversation;
 exports.createConversation = createConversation;
 exports.updateConversation = updateConversation;
 exports.completeConversation = completeConversation;
 exports.cancelConversation = cancelConversation;
 const client_1 = require("../../generated/prisma/client");
-const prisma_1 = __importDefault(require("../lib/prisma"));
-async function findActiveConversationByPhoneNumber(phoneNumber) {
-    const conversation = await prisma_1.default.conversation.findFirst({
+const prisma_1 = require("../lib/prisma");
+async function findActiveConversation(userPhoneNumber, servicePhoneNumber) {
+    const conversation = await prisma_1.prisma.conversation.findFirst({
         where: {
-            phoneNumber,
+            userPhoneNumber,
+            servicePhoneNumber,
             status: client_1.ConversationStatus.active
         },
         orderBy: {
@@ -24,7 +22,7 @@ async function findActiveConversationByPhoneNumber(phoneNumber) {
         return null;
     }
     if (conversation.expiresAt && conversation.expiresAt.getTime() <= Date.now()) {
-        await prisma_1.default.conversation.update({
+        await prisma_1.prisma.conversation.update({
             where: {
                 id: conversation.id
             },
@@ -37,9 +35,10 @@ async function findActiveConversationByPhoneNumber(phoneNumber) {
     return conversation;
 }
 async function createConversation(input) {
-    return prisma_1.default.conversation.create({
+    return prisma_1.prisma.conversation.create({
         data: {
-            phoneNumber: input.phoneNumber,
+            userPhoneNumber: input.userPhoneNumber,
+            servicePhoneNumber: input.servicePhoneNumber,
             flowId: input.flowId,
             flowVersion: input.flowVersion,
             currentStep: input.currentStep,
@@ -51,7 +50,7 @@ async function createConversation(input) {
     });
 }
 async function updateConversation(conversationId, data) {
-    return prisma_1.default.conversation.update({
+    return prisma_1.prisma.conversation.update({
         where: {
             id: conversationId
         },
@@ -59,7 +58,7 @@ async function updateConversation(conversationId, data) {
     });
 }
 async function completeConversation(conversationId, data = {}) {
-    return prisma_1.default.conversation.update({
+    return prisma_1.prisma.conversation.update({
         where: {
             id: conversationId
         },
@@ -71,7 +70,7 @@ async function completeConversation(conversationId, data = {}) {
     });
 }
 async function cancelConversation(conversationId, data = {}) {
-    return prisma_1.default.conversation.update({
+    return prisma_1.prisma.conversation.update({
         where: {
             id: conversationId
         },

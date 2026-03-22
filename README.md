@@ -13,6 +13,10 @@ npm install
 - `PORT`
 - `DATABASE_URL`
 - `EXAMPLE_ADMIN_PHONE` (optional, used by the example action)
+- `SIGNALWIRE_SPACE_URL`
+- `SIGNALWIRE_PROJECT_ID`
+- `SIGNALWIRE_API_TOKEN`
+- `SIGNALWIRE_SIGNING_KEY`
 
 3. Generate Prisma client:
 
@@ -36,6 +40,8 @@ npm run dev
 
 `POST /api/messages/inbound`
 
+SignalWire should post compatibility-style inbound webhooks to this route.
+
 Example request body:
 
 ```json
@@ -56,4 +62,6 @@ Example request body:
 - Flows live under `src/flow/flows/`.
 - Add a new flow by creating a new flow file and registering it in `src/flow/engine/flowRegistry.ts`.
 - Add new named actions in a flow action file and register them in `src/flow/engine/actionRegistry.ts`.
-- The SMS service is currently a stub and can be replaced later with a real provider implementation.
+- Conversations are keyed by `(userPhoneNumber, servicePhoneNumber)`.
+- Replies are always sent from the number the user texted.
+- Opt-outs are scoped per service number.
